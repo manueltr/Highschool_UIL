@@ -5,97 +5,105 @@ public class Stelios
 {
 	public static void main(String[] args) throws IOException
 	{
+		
 		Scanner bob= new Scanner(new File("stelios.dat"));
 		
-		while(bob.hasNext())
-		{
+		while(bob.hasNext()) {   
+
+			// get line and split into string array
 			String[] line = bob.nextLine().trim().split(" ");
+
 			int counter= Integer.valueOf(line[0]);
 			ArrayList<Nodes> vertices = new ArrayList<Nodes>();
 			Character naming='A';
 			
-			//////////////////// makes nodes;-
-			for(int x=0; x<counter; x++) 
-			{
+			// make corresponding nodes, add to vertices list
+			for(int x=0; x<counter; x++) {
 				Nodes temp = new Nodes(naming);
 				vertices.add(temp);
 				naming++;
 			}
-			/////////////////////
 			
-			///////////////////////will set connecting nodes
-			for(int x=1; x<line.length;x++)
-			{
+			
+			// will set node connections
+			for(int x=1; x < line.length; x++) {
+
+				// cEdge is for example 'AB' , 'BC' etc
 				String cEdge = line[x];
 				
-				for(Nodes temp: vertices)
-				{
-					if(cEdge.charAt(0)==temp.getName())
-					{
+
+				for(Nodes temp: vertices){
+
+					if(cEdge.charAt(0) == temp.getName()) {
 						temp.setEdge(cEdge.charAt(1));
 					}
 					
-					if(cEdge.charAt(1)==temp.getName())
-					{
+					if(cEdge.charAt(1) == temp.getName()){
 						temp.setEdge(cEdge.charAt(0));
 					}
 				}
 			}
-			/////////////////////////////////////////////////
 			
 			
-			
-			int[] cLine = new int[counter];
+			int[] distances = new int[counter];
 			int[][] matrix= new int[counter][counter];
-					
-			for(int x=0;x<counter;x++)
-			{
-				
-				cLine = shortestPath(x,vertices);
-				
-				for(int z=0; z<counter;z++)
-				{
-					matrix[x][z]=cLine[z];
-				}
+			
+			
+			// makes array of distances to all other nodes, for each vertex
+			for(int x = 0; x < counter; x++){
+
+				distances = shortestPath(x, vertices);
+				matrix[x] = distances;
+			
 			}
 			
 			printOutConnections(counter,matrix,vertices);
-			/*printOutResults(matrix);*/
+			// printOutResults(matrix);
 			
 	
 		}
 	}
 	
+
+	// BFS
 	public static int[] shortestPath(int start, ArrayList<Nodes> vertices)
-	{
+	{   
+
 		LinkedList<Integer> queue = new LinkedList<Integer>();
 		queue.add(start);
 		
+		int[] distanceToNodes= new int[vertices.size()];
+		Arrays.fill(distanceToNodes, -1);
+		distanceToNodes[start]=0;
 		
-		
-		int[] distances= new int[vertices.size()];
-		Arrays.fill(distances, -1);
-		distances[start]=0;
-		
+
 		while(!queue.isEmpty())
 		{
-			int currentNode=queue.poll();
-			Nodes cNode= vertices.get(currentNode);
+			int currentIndex = queue.poll();
+			Nodes currentNode = vertices.get(currentIndex);
 			
-			for(Character temp: cNode.getEdge())
+			// loops through currentNode edges
+			for(Character temp: currentNode.getEdge())
 			{
-				int location = Integer.valueOf(temp)-65;
-				if(distances[location]==-1)
-				{
-					distances[location]= distances[currentNode] + 1;
-					queue.add(location);
-					
+				// sets index Ex. A = 0, B = 1
+				int nextNode = Integer.valueOf(temp)-65;
+
+
+				/* 
+				if an edge has not been gotten to (distance = -1) then add the current node
+				distance + 1
+				add that discovered node to queue, so that its edges can also be check
+				*/
+
+				if(distanceToNodes[nextNode] == -1) {
+					distanceToNodes[nextNode] = distanceToNodes[currentIndex] + 1;
+					queue.add(nextNode);
 				}
 			}
 			
 		}
 		
-		return distances;
+		return distanceToNodes;
 	}
 	
 	
